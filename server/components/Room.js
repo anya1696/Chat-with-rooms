@@ -18,7 +18,6 @@ Room.prototype.addUser = function (user) {
 
 Room.prototype.getUserById = function (userId) {
     let users = this.users;
-    console.log("****:", users);
     for (const user of users){
         if (user.userId === userId){
             return user;

@@ -3,7 +3,6 @@ import './App.css';
 import openSocket from 'socket.io-client'
 import Message from './components/Message'
 import UsersList from './components/UsersList'
-import UserItem from "./components/UserItem";
 
 const socket = openSocket('http://localhost:3001/');
 
@@ -20,6 +19,8 @@ class App extends Component {
             roomId: roomId,
             userId: '',
             userName: '',
+            isMessageInputVisible: false,
+            isNameInputVisible: true,
             messages: [],
             users: [],
             urlToInvite:'http://192.168.0.109:3000'
@@ -34,16 +35,16 @@ class App extends Component {
         });
 
         socket.on('registred', data => {
-            console.log("*****ON REGISTER:", data);
             this.setState(state => ({
                 ...state,
                 roomId: data.roomId,
                 userId: data.userData.userId,
                 messages: data.allMessages,
+                isMessageInputVisible: true,
+                isNameInputVisible: false,
                 users: data.allUsers,
                 urlToInvite: state.urlToInvite + "?roomId="+data.roomId
             }));
-            console.log("****Messages:", data);
         });
 
         socket.on('user join', data => {
@@ -51,7 +52,6 @@ class App extends Component {
                 ...state,
                 text: '',
                 users: data.allUsers,
-                messages: [...state.messages, data.message]
             }))
         });
     }
@@ -89,32 +89,24 @@ class App extends Component {
         return (
             <div className="App">
                 <header className="App-header">
-                    {/*<img src={logo} className="App-logo" alt="logo"/>*/}
-                    <p>
-                        Edit <code>src/App.js</code> and save to reload.
-                    </p>
-
                     <UsersList users={this.state.users}/>
                     <div className='chat'>
-                        <div className='chat-messages'>
-                            <div className='chat-messages__content' id='messages'>
-                                Загрузка...
-                            </div>
-                        </div>
                         <div className='chat-input'>
-                            <form method='post' id='chat-form' onSubmit={this.onMessageSubmit}>
-                                <input type='text' id='message-text' className='chat-form__input'
-                                       //placeholder='Введите сообщение' onChange={this.handleChange} value={this.state.text}/>
+                            <form method='post' id='chat-form' onSubmit={this.onMessageSubmit} style={{
+                                visibility: this.state.isMessageInputVisible? "visible" : "hidden"
+                            }}>
+                                <input type='text' id='message-text' className='chat-form-input'
                                        placeholder='Введите сообщение' onChange={(e) => {this.handleMessageChange(e.target)}} value={this.state.text}/>
                                 <input type='submit' className='chat-form__submit' value='=>'/>
                             </form>
-                            <form method='post' id='name-form' onSubmit={this.onNameSubmit}>
-                                <input type='text' id='name-text' className='chat-form__input'
+                            <form method='post' id='name-form' onSubmit={this.onNameSubmit} style={{
+                                visibility: this.state.isNameInputVisible? "visible" : "hidden"
+                            }}>
+                                <input type='text' id='name-text' className='chat-form-input'
                                        placeholder='Введите имя' onChange={(e) => {this.handleNameChange(e.target)}}/>
                                 <input type='submit' className='chat-form__submit' value='=>'/>
                             </form>
                         </div>
-                        {/*<label> Current room id: { this.useQuery().get("roomId") } </label>*/}
                         <label> Copy the link to invite { this.state.urlToInvite } </label>
                         <div className='chat-output'>
                             {this.state.messages.map((message, index) => (

@@ -19,7 +19,6 @@ let rooms = [];
 let massages = [];
 
 io.sockets.on('connection', (socket) => {
-    console.log("****conect");
     connections.push(socket);
 
     socket.on('new user', (username, newRoomMod, roomId) => {
@@ -43,11 +42,8 @@ io.sockets.on('connection', (socket) => {
 
         console.log(`${socket.username} joined`, room);
         socket.broadcast.to(localRoomId).emit('user join', {
-
-            username: user.getName(),
-            userId: user.getUserId()
+            allUsers:room.getCurrentUsers()
         });
-        console.log("******allUsers:",room.getCurrentUsers(), room);
         socket.emit('registred', {
             roomId: localRoomId,
             userData: {userId: user.getUserId(),
@@ -73,7 +69,6 @@ io.sockets.on('connection', (socket) => {
     });
 
     socket.on('disconnect', (data)=>{
-       // console.log("****disconnect");
         connections.splice(connections.indexOf(socket), 1);
     });
 

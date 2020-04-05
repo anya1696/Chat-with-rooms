@@ -40,7 +40,6 @@ io.sockets.on('connection', (socket) => {
 
         socket.join(localRoomId);
 
-        console.log(`${socket.username} joined`, room);
         socket.broadcast.to(localRoomId).emit('user join', {
             allUsers:room.getCurrentUsers()
         });
@@ -53,7 +52,7 @@ io.sockets.on('connection', (socket) => {
     });
 
     socket.on('new message', data => {
-        console.log('MSG: ', data);
+
         let room = rooms[data.roomId];
         const user = room.getUserById(data.userId);
         const message = new Message(user, data.roomId, data.messageText);
@@ -61,7 +60,6 @@ io.sockets.on('connection', (socket) => {
         room.addMessage(message);
 
         massages.push(data);
-        //console.log("*message to room",room , user);
         io.sockets.to(data.roomId).emit('new message',{
             message: data.messageText,
             userData: {userId: user.getUserId(),

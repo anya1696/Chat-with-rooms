@@ -5,8 +5,8 @@ export default class Message extends React.Component {
     render() {
         let {message} = this.props;
         return (
-            <div >
-                <UserItem user={message.userData} />
+            <div>
+                <UserItem user={message.userData}/>
                 <span>: {message.messageText}</span>
             </div>
         );

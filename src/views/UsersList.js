@@ -8,7 +8,7 @@ export default class UsersList extends React.Component {
             <span className='chat-output'>
                 {users.map((user, index) => (
                     <div key={index}>
-                    <UserItem user={user}/>
+                        <UserItem user={user}/>
                     </div>
                 ))}
             </span>

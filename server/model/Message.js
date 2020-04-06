@@ -1,4 +1,4 @@
-function Message(user, roomId, messageText){
+function Message(user, roomId, messageText) {
     this.userData = user;
     this.roomId = roomId;
     this.messageText = messageText;
@@ -6,7 +6,7 @@ function Message(user, roomId, messageText){
 }
 
 Message.prototype.getMessage = function () {
-  return this.messageText;
+    return this.messageText;
 };
 
 module.exports = Message;

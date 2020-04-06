@@ -1,12 +1,33 @@
 import React, {Component} from 'react';
 import './App.css';
 import openSocket from 'socket.io-client'
-import Message from './components/Message'
-import UsersList from './components/UsersList'
+import Message from './views/Message'
+import UsersList from './views/UsersList'
 
 const socket = openSocket('http://localhost:3001/');
+const url = window.location.origin;
 
 class App extends Component {
+
+    onMessageSubmit = (e) => {
+        e.preventDefault();
+        this.setState(state => ({...state, text: ''}));
+        const data = {
+            roomId: this.state.roomId,
+            userId: this.state.userId,
+            messageText: this.state.text
+        };
+        socket.emit('new message', data);
+    };
+    onNameSubmit = (e) => {
+        e.preventDefault();
+        const newRoomMod = !this.state.roomId;
+        if (newRoomMod) {
+            socket.emit('new user', this.state.userName, newRoomMod);
+        } else {
+            socket.emit('new user', this.state.userName, newRoomMod, this.state.roomId);
+        }
+    };
 
     constructor(props) {
         super(props);
@@ -22,15 +43,15 @@ class App extends Component {
             isMessageInputVisible: false,
             isNameInputVisible: true,
             messages: [],
-            users: [],
-            urlToInvite:'http://192.168.0.109:3000'
+            users: []
         }
     }
-    componentDidMount(){
+
+    componentDidMount() {
         socket.on('new message', data => {
             this.setState(state => ({
                 ...state,
-                messages: [...state.messages, {messageText: data.message, userData: data.userData }]
+                messages: [...state.messages, {messageText: data.message, userData: data.userData}]
             }));
         });
 
@@ -42,8 +63,7 @@ class App extends Component {
                 messages: data.allMessages,
                 isMessageInputVisible: true,
                 isNameInputVisible: false,
-                users: data.allUsers,
-                urlToInvite: state.urlToInvite + "?roomId="+data.roomId
+                users: data.allUsers
             }));
         });
 
@@ -57,64 +77,45 @@ class App extends Component {
     }
 
     handleMessageChange(target) {
-        this.setState(state => ({ ...state, text: target.value }));
+        this.setState(state => ({...state, text: target.value}));
     }
 
     handleNameChange(target) {
-        this.setState(state => ({ ...state, userName: target.value }));
+        this.setState(state => ({...state, userName: target.value}));
     }
-
-    onMessageSubmit = (e) => {
-        e.preventDefault();
-        this.setState(state => ({ ...state, text: '' }));
-        const data = {
-            roomId: this.state.roomId,
-            userId: this.state.userId,
-            messageText: this.state.text
-        };
-        socket.emit('new message', data);
-    };
-
-    onNameSubmit = (e) => {
-        e.preventDefault();
-        const newRoomMod = !this.state.roomId;
-        if (newRoomMod){
-            socket.emit('new user', this.state.userName, newRoomMod);
-        }else {
-            socket.emit('new user', this.state.userName, newRoomMod, this.state.roomId);
-        }
-    };
 
     render() {
         return (
-            <div className="App">
-                <header className="App-header">
-                    <UsersList users={this.state.users}/>
-                    <div className='chat'>
-                        <div className='chat-input'>
-                            <form method='post' id='chat-form' onSubmit={this.onMessageSubmit} style={{
-                                visibility: this.state.isMessageInputVisible? "visible" : "hidden"
-                            }}>
-                                <input type='text' id='message-text' className='chat-form-input'
-                                       placeholder='Введите сообщение' onChange={(e) => {this.handleMessageChange(e.target)}} value={this.state.text}/>
-                                <input type='submit' className='chat-form__submit' value='=>'/>
-                            </form>
-                            <form method='post' id='name-form' onSubmit={this.onNameSubmit} style={{
-                                visibility: this.state.isNameInputVisible? "visible" : "hidden"
-                            }}>
-                                <input type='text' id='name-text' className='chat-form-input'
-                                       placeholder='Введите имя' onChange={(e) => {this.handleNameChange(e.target)}}/>
-                                <input type='submit' className='chat-form__submit' value='=>'/>
-                            </form>
-                        </div>
-                        <label> Copy the link to invite { this.state.urlToInvite } </label>
-                        <div className='chat-output'>
-                            {this.state.messages.map((message, index) => (
-                                <Message key={index} message={message}/>
-                            ))}
-                        </div>
+            <div className="App App-header">
+                <UsersList users={this.state.users}/>
+                <div className='chat'>
+                    <div className='chat-input'>
+                        <form method='post' id='chat-form' onSubmit={this.onMessageSubmit} style={{
+                            visibility: this.state.isMessageInputVisible ? "visible" : "hidden"
+                        }}>
+                            <input type='text' id='message-text' className='chat-form-input'
+                                   placeholder='Введите сообщение' onChange={(e) => {
+                                this.handleMessageChange(e.target)
+                            }} value={this.state.text}/>
+                            <input type='submit' className='chat-form__submit' value='=>'/>
+                        </form>
+                        <form method='post' id='name-form' onSubmit={this.onNameSubmit} style={{
+                            visibility: this.state.isNameInputVisible ? "visible" : "hidden"
+                        }}>
+                            <input type='text' id='name-text' className='chat-form-input'
+                                   placeholder='Введите имя' onChange={(e) => {
+                                this.handleNameChange(e.target)
+                            }}/>
+                            <input type='submit' className='chat-form__submit' value='=>'/>
+                        </form>
                     </div>
-                </header>
+                    <span> Copy the link to invite {url + (this.state.roomId ? ("?roomId=" + this.state.roomId) : "")} </span>
+                    <div className='chat-output'>
+                        {this.state.messages.map((message, index) => (
+                            <Message key={index} message={message}/>
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }

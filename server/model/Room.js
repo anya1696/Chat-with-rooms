@@ -1,7 +1,7 @@
-function Room(){
-  this.id = "room_"+`f${(+new Date).toString(16)}`;
-  this.users = [];
-  this.messages = [];
+function Room() {
+    this.id = "room_" + `f${(+new Date).toString(16)}`;
+    this.users = [];
+    this.messages = [];
 }
 
 Room.prototype.getRoomId = function () {
@@ -18,8 +18,8 @@ Room.prototype.addUser = function (user) {
 
 Room.prototype.getUserById = function (userId) {
     let users = this.users;
-    for (const user of users){
-        if (user.userId === userId){
+    for (const user of users) {
+        if (user.userId === userId) {
             return user;
         }
     }

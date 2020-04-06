@@ -2,17 +2,16 @@ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io').listen(server);
-const Room = require('./components/Room');
-const User = require('./components/User');
-const Message = require('./components/Message');
+const Room = require('./model/Room');
+const User = require('./model/User');
+const Message = require('./model/Message');
 
 server.listen(3001);
 
-app.get('/', (request, respons) =>{
+app.get('/', (request, respons) => {
     respons.sendFile(__dirname + 'index.html');
 });
 
-let users = [];
 let connections = [];
 let rooms = [];
 
@@ -27,11 +26,11 @@ io.sockets.on('connection', (socket) => {
         const user = new User(username);
         let room;
         let localRoomId;
-        if (newRoomMod){
+        if (newRoomMod) {
             room = new Room();
             localRoomId = room.getRoomId();
             rooms[localRoomId] = room;
-        }else {
+        } else {
             localRoomId = roomId;
             room = rooms[localRoomId];
         }
@@ -41,14 +40,17 @@ io.sockets.on('connection', (socket) => {
         socket.join(localRoomId);
 
         socket.broadcast.to(localRoomId).emit('user join', {
-            allUsers:room.getCurrentUsers()
+            allUsers: room.getCurrentUsers()
         });
         socket.emit('registred', {
             roomId: localRoomId,
-            userData: {userId: user.getUserId(),
-                       name: user.getName()},
+            userData: {
+                userId: user.getUserId(),
+                name: user.getName()
+            },
             allMessages: room.getMessages(),
-            allUsers:room.getCurrentUsers()})
+            allUsers: room.getCurrentUsers()
+        })
     });
 
     socket.on('new message', data => {
@@ -60,13 +62,16 @@ io.sockets.on('connection', (socket) => {
         room.addMessage(message);
 
         massages.push(data);
-        io.sockets.to(data.roomId).emit('new message',{
+        io.sockets.to(data.roomId).emit('new message', {
             message: data.messageText,
-            userData: {userId: user.getUserId(),
-            name: user.getName()}})
+            userData: {
+                userId: user.getUserId(),
+                name: user.getName()
+            }
+        })
     });
 
-    socket.on('disconnect', (data)=>{
+    socket.on('disconnect', () => {
         connections.splice(connections.indexOf(socket), 1);
     });
 
